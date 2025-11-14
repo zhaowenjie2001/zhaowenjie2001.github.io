@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>计算机一级考试系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <style>
+    /* 基础样式 */
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #165DFF;
+      color: white;
+      border: none;
+    }
+    .btn-primary:hover {
+      background: #0E4CD1;
+    }
+    .btn-danger {
+      background: #F87272;
+      color: white;
+      border: none;
+    }
+    .btn-danger:hover {
+      background: #E56060;
+    }
+    .btn-default {
+      background: white;
+      color: #6B7280;
+      border: 1px solid #E5E7EB;
+    }
+    .btn-default:hover {
+      background: #F3F4F6;
+    }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal.show {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      transform: scale(0.9);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    .modal.show .modal-content {
+      transform: scale(1);
+      opacity: 1;
+    }
+    .hidden {
+      display: none !important;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    th {
+      color: #6B7280;
+      font-weight: 500;
+    }
+    input, button, select {
+      font-size: 16px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-top: 80px;
+    }
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    .header-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    /* 角色选择样式 */
+    .role-selection {
+      max-width: 800px;
+      margin: 50px auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    .role-card {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .role-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .role-icon {
+      font-size: 40px;
+      color: #165DFF;
+      margin-bottom: 15px;
+    }
+    /* 考试相关样式 */
+    .exam-container {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+    .question-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    .progress-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 90px;
+    }
+    .option-item {
+      padding: 12px;
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .option-item:hover {
+      background: #F9FAFB;
+    }
+    .option-item.selected {
+      border-color: #165DFF;
+      background: #E8F0FE;
+    }
+    .progress-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .progress-item {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #E5E7EB;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .progress-item.answered {
+      background: #E8F0FE;
+      border-color: #165DFF;
+      color: #165DFF;
+    }
+    .progress-item.current {
+      border-color: #165DFF;
+      box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.2);
+    }
+    /* 成绩结果样式 */
+    .result-card {
+      max-width: 600px;
+      margin: 50px auto;
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .score-display {
+      font-size: 60px;
+      font-weight: bold;
+      color: #165DFF;
+      margin: 20px 0;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin: 30px 0;
+    }
+    .stat-item {
+      padding: 15px;
+      background: #F9FAFB;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+    .timer {
+      color: #6B7280;
+      font-size: 18px;
+      font-weight: 500;
+      text-align: right;
+      margin-bottom: 20px;
+    }
+    .timer.warning {
+      color: #F87272;
+    }
+    /* 教师查看试卷样式 */
+    .paper-view-card {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+    }
+    .paper-header {
+      border-bottom: 1px solid #E5E7EB;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .paper-title {
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 24px;
+      color: #165DFF;
+    }
+    .paper-student-info {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 15px;
+    }
+    .paper-info-item {
+      display: flex;
+      align-items: center;
+    }
+    .paper-info-icon {
+      color: #165DFF;
+      margin-right: 8px;
+    }
+    .question-item {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #F3F4F6;
+    }
+    .question-number {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #165DFF;
+    }
+    .option-display {
+      padding: 10px;
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .option-correct {
+      border-color: #36D399;
+      background: #F0FFF4;
+    }
+    .option-student {
+      border-color: #F87272;
+      background: #FFF2F2;
+    }
+    .answer-status {
+      margin-top: 10px;
+      font-weight: 500;
+    }
+    .status-correct {
+      color: #36D399;
+    }
+    .status-wrong {
+      color: #F87272;
+    }
+    .status-unanswered {
+      color: #6B7280;
+    }
+  </style>
+</head>
+<body style="background: #F9FAFB; margin: 0; font-family: sans-serif;">
+  <!-- 导航栏 -->
+  <nav style="position: fixed; top: 0; left: 0; right: 0; background: white; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 100;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+      <div style="font-weight: bold; font-size: 18px; color: #165DFF;">
+        <i class="fa fa-graduation-cap"></i> 计算机一级考试系统
+      </div>
+      <div id="user-info" class="hidden">
+        <span id="current-user"></span>
+        <button id="logout-btn" style="border: none; background: none; color: #165DFF; margin-left: 15px; cursor: pointer;">
+          <i class="fa fa-sign-out"></i> 退出
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主容器 -->
+  <div class="container">
+    <!-- 1. 角色选择页面 -->
+    <div id="role-selection" class="role-selection">
+      <div class="role-card" id="student-role-card">
+        <div class="role-icon">
+          <i class="fa fa-user-circle"></i>
+        </div>
+        <h2 style="margin-top: 0;">学生端</h2>
+        <p style="color: #6B7280; margin-bottom: 20px;">使用教师添加的账号登录答题</p>
+        <button id="go-to-student-login" class="btn btn-primary">
+          进入学生端
+        </button>
+      </div>
+      <div class="role-card" id="teacher-role-card">
+        <div class="role-icon">
+          <i class="fa fa-users"></i>
+        </div>
+        <h2 style="margin-top: 0;">教师端</h2>
+        <p style="color: #6B7280; margin-bottom: 20px;">管理学生、上传题库、查看成绩</p>
+        <button id="go-to-teacher-login" class="btn btn-primary">
+          进入教师端
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. 教师登录界面 -->
+    <div id="teacher-login-view" class="hidden" style="max-width: 400px; margin: 50px auto;">
+      <div class="card">
+        <h2 style="margin-top: 0; text-align: center;">教师登录</h2>
+        <form id="teacher-login-form">
+          <div>
+            <label style="display: block; margin-bottom: 8px; color: #4B5563;">教师ID</label>
+            <input type="text" id="teacher-id" required placeholder="请输入教师ID">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 8px; color: #4B5563;">密码</label>
+            <input type="password" id="teacher-password" required placeholder="请输入密码">
+            <p style="color: #6B7280; font-size: 14px; margin: 5px 0 0 0;">默认密码：teacher123</p>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+            <i class="fa fa-sign-in"></i> 登录
+          </button>
+          <button type="button" id="back-to-role-from-teacher" class="btn btn-default" style="width: 100%; margin-top: 10px;">
+            <i class="fa fa-arrow-left"></i> 返回角色选择
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 3. 学生登录界面 -->
+    <div id="student-login-view" class="hidden" style="max-width: 400px; margin: 50px auto;">
+      <div class="card">
+        <h2 style="margin-top: 0; text-align: center;">学生登录</h2>
+        <form id="student-login-form">
+          <div>
+            <label style="display: block; margin-bottom: 8px; color: #4B5563;">手机号（账号）</label>
+            <input type="tel" id="student-login-phone" required placeholder="请输入手机号">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 8px; color: #4B5563;">密码</label>
+            <input type="password" id="student-login-password" required placeholder="请输入密码">
+            <p id="student-login-error" class="hidden" style="color: #F87272; font-size: 14px; margin: 5px 0 0 0;">
+              <i class="fa fa-exclamation-circle"></i> 手机号或密码错误
+            </p>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+            <i class="fa fa-sign-in"></i> 开始考试
+          </button>
+          <button type="button" id="back-to-role-from-student" class="btn btn-default" style="width: 100%; margin-top: 10px;">
+            <i class="fa fa-arrow-left"></i> 返回角色选择
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 4. 教师学生管理界面 -->
+    <div id="teacher-student-management" class="hidden">
+      <div class="card">
+        <div class="header-actions">
+          <h2 style="margin: 0;">学生管理</h2>
+          <div style="display: flex; gap: 10px;">
+            <button id="upload-question-btn" class="btn btn-primary">
+              <i class="fa fa-upload"></i> 上传题库
+            </button>
+            <button id="add-student-btn" class="btn btn-primary">
+              <i class="fa fa-plus"></i> 添加学生
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <input type="text" id="student-search" placeholder="搜索学生（姓名/手机号）">
+        </div>
+
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>姓名</th>
+                <th>手机号（账号）</th>
+                <th>得分</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="students-list">
+              <!-- 学生数据动态生成 -->
+            </tbody>
+          </table>
+          <div id="no-students" class="hidden" style="text-align: center; padding: 40px; color: #6B7280;">
+            <i class="fa fa-users" style="font-size: 40px; margin-bottom: 10px; opacity: 0.3;"></i>
+            <p>暂无学生数据，请添加学生</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 学生答题界面 -->
+    <div id="student-exam-view" class="hidden">
+      <div class="exam-container">
+        <div>
+          <div class="timer" id="exam-timer">30:00</div>
+          <div class="question-card" id="question-container">
+            <!-- 题目动态生成 -->
+          </div>
+          <div style="display: flex; gap: 10px; margin-bottom: 30px;">
+            <button id="prev-question-btn" class="btn btn-default" disabled>
+              <i class="fa fa-arrow-left"></i> 上一题
+            </button>
+            <button id="next-question-btn" class="btn btn-default">
+              下一题 <i class="fa fa-arrow-right"></i>
+            </button>
+            <button id="submit-exam-btn" class="btn btn-primary" style="margin-left: auto;">
+              提交试卷 <i class="fa fa-check"></i>
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="progress-card">
+            <h3 style="margin-top: 0; margin-bottom: 20px;">答题进度</h3>
+            <div class="progress-grid" id="progress-container">
+              <!-- 进度点动态生成 -->
+            </div>
+            <div style="display: flex; gap: 20px; font-size: 14px; color: #6B7280;">
+              <div style="display: flex; align-items: center;">
+                <span style="width: 12px; height: 12px; border-radius: 50%; background: #E5E7EB; display: inline-block; margin-right: 5px;"></span>
+                未答题
+              </div>
+              <div style="display: flex; align-items: center;">
+                <span style="width: 12px; height: 12px; border-radius: 50%; background: #E8F0FE; border: 1px solid #165DFF; display: inline-block; margin-right: 5px;"></span>
+                已答题
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. 考试结果界面 -->
+    <div id="exam-result-view" class="hidden">
+      <div class="result-card">
+        <h2 style="margin-top: 0;">考试完成！</h2>
+        <p id="result-student-name" style="color: #6B7280;"></p>
+        <div class="score-display" id="result-score">0</div>
+        <div id="result-status" style="font-size: 20px; font-weight: 500; margin-bottom: 20px;"></div>
+        
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div style="color: #6B7280;">总题数</div>
+            <div class="stat-value" id="stat-total">0</div>
+          </div>
+          <div class="stat-item">
+            <div style="color: #6B7280;">做对</div>
+            <div class="stat-value" style="color: #36D399;" id="stat-correct">0</div>
+          </div>
+          <div class="stat-item">
+            <div style="color: #6B7280;">做错</div>
+            <div class="stat-value" style="color: #F87272;" id="stat-wrong">0</div>
+          </div>
+          <div class="stat-item">
+            <div style="color: #6B7280;">未答</div>
+            <div class="stat-value" style="color: #6B7280;" id="stat-unanswered">0</div>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+          <button id="review-answers-btn" class="btn btn-default" style="flex: 1;">
+            查看答题详情
+          </button>
+          <button id="back-to-student-login-btn" class="btn btn-primary" style="flex: 1;">
+            退出登录
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. 教师查看学生试卷界面 -->
+    <div id="teacher-view-paper" class="hidden">
+      <button id="back-to-student-list" class="btn btn-default" style="margin-bottom: 20px;">
+        <i class="fa fa-arrow-left"></i> 返回学生列表
+      </button>
+      
+      <div class="paper-view-card">
+        <div class="paper-header">
+          <h2 class="paper-title">学生试卷详情</h2>
+          <div class="paper-student-info">
+            <div class="paper-info-item">
+              <i class="fa fa-user paper-info-icon"></i>
+              <span id="paper-student-name">学生姓名</span>
+            </div>
+            <div class="paper-info-item">
+              <i class="fa fa-phone paper-info-icon"></i>
+              <span id="paper-student-phone">手机号</span>
+            </div>
+            <div class="paper-info-item">
+              <i class="fa fa-scoreboard paper-info-icon"></i>
+              <span id="paper-student-score">得分：0</span>
+            </div>
+          </div>
+          <div class="paper-info-item">
+            <i class="fa fa-check-circle paper-info-icon"></i>
+            <span id="paper-exam-status">考试状态</span>
+          </div>
+        </div>
+        
+        <div id="paper-questions-container">
+          <!-- 试卷题目动态生成 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹窗 -->
+  <div id="add-student-modal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-top: 0; text-align: center;">添加学生</h3>
+      <form id="add-student-form">
+        <input type="hidden" id="edit-student-id">
+        <div>
+          <label style="display: block; margin-bottom: 8px; color: #4B5563;">姓名</label>
+          <input type="text" id="student-name" required placeholder="请输入姓名">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 8px; color: #4B5563;">手机号（账号）</label>
+          <input type="tel" id="student-phone" required placeholder="请输入手机号">
+          <p id="phone-error" class="hidden" style="color: #F87272; font-size: 14px; margin: -10px 0 10px 0;">
+            <i class="fa fa-exclamation-circle"></i> 该手机号已存在
+          </p>
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 8px; color: #4B5563;">密码</label>
+          <input type="password" id="student-password" required placeholder="请设置密码">
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="button" id="cancel-add" class="btn btn-default" style="flex: 1;">取消</button>
+          <button type="submit" class="btn btn-primary" style="flex: 1;">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="delete-modal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-top: 0; text-align: center;">确认删除？</h3>
+      <p id="delete-message" style="text-align: center; color: #6B7280;">
+        确定要删除该学生吗？删除后数据无法恢复
+      </p>
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button id="cancel-delete" class="btn btn-default" style="flex: 1;">取消</button>
+        <button id="confirm-delete" class="btn btn-danger" style="flex: 1;">确认删除</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="upload-modal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-top: 0; text-align: center;">上传题库</h3>
+      <p style="color: #6B7280; text-align: center; margin-bottom: 20px;">
+        请上传CSV格式的题库文件（格式：题目,选项A,选项B,选项C,选项D,正确答案(0-3)）
+      </p>
+      <div style="text-align: center; padding: 20px; border: 2px dashed #E5E7EB; border-radius: 6px; margin-bottom: 20px;">
+        <input type="file" id="question-file" accept=".csv" style="display: none;">
+        <button id="select-file-btn" class="btn btn-default">
+          <i class="fa fa-file-text-o"></i> 选择文件
+        </button>
+        <p id="selected-file-name" style="margin-top: 10px; color: #6B7280; font-size: 14px;">
+          未选择文件
+        </p>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button id="cancel-upload" class="btn btn-default" style="flex: 1;">取消</button>
+        <button id="confirm-upload" class="btn btn-primary" style="flex: 1;">上传</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提交确认弹窗 -->
+  <div id="submit-confirm-modal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-top: 0; text-align: center;">确认提交？</h3>
+      <p style="text-align: center; color: #6B7280; margin-bottom: 20px;">
+        提交后将无法修改答案，是否确认提交试卷？
+      </p>
+      <div style="display: flex; gap: 10px;">
+        <button id="cancel-submit" class="btn btn-default" style="flex: 1;">取消</button>
+        <button id="confirm-submit" class="btn btn-primary" style="flex: 1;">确认提交</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 全局数据
+    let students = JSON.parse(localStorage.getItem('students') || '[]');
+    let questionBank = JSON.parse(localStorage.getItem('questionBank') || JSON.stringify([
+      // 默认题库（示例10题，实际使用时可通过CSV上传更多）
+      {
+        id: 1,
+        question: "在计算机中，信息的最小单位是？",
+        options: ["字节(Byte)", "位(bit)", "字(Word)", "KB"],
+        answer: 1
+      },
+      {
+        id: 2,
+        question: "下列不属于操作系统的是？",
+        options: ["Windows", "Linux", "Office", "macOS"],
+        answer: 2
+      },
+      {
+        id: 3,
+        question: "计算机网络最突出的优点是？",
+        options: ["运算速度快", "存储容量大", "资源共享", "运算精度高"],
+        answer: 2
+      },
+      {
+        id: 4,
+        question: "下列IP地址中，正确的是？",
+        options: ["202.96.12.14", "202.96.123.256", "202.96.123.255.1", "202.96.123"],
+        answer: 0
+      },
+      {
+        id: 5,
+        question: "在Word中，要将文档中选定的文字移动到指定位置，应使用的操作是？",
+        options: ["复制+粘贴", "剪切+粘贴", "格式刷", "插入+粘贴"],
+        answer: 1
+      },
+      {
+        id: 6,
+        question: "计算机病毒是一种？",
+        options: ["特殊的计算机部件", "游戏软件", "人为编制的特殊程序", "能传染的生物病毒"],
+        answer: 2
+      },
+      {
+        id: 7,
+        question: "下列设备中，属于输入设备的是？",
+        options: ["显示器", "打印机", "鼠标", "音箱"],
+        answer: 2
+      },
+      {
+        id: 8,
+        question: "Internet的中文含义是？",
+        options: ["局域网", "城域网", "广域网", "因特网"],
+        answer: 3
+      },
+      {
+        id: 9,
+        question: "在Excel中，单元格地址是指？",
+        options: ["每一个单元格", "单元格所在的工作表", "单元格在工作表中的位置", "单元格所在的工作簿"],
+        answer: 2
+      },
+      {
+        id: 10,
+        question: "下列存储设备中，存取速度最快的是？",
+        options: ["硬盘", "内存", "光盘", "U盘"],
+        answer: 1
+      }
+    ]));
+    let currentEditId = null;
+    let currentDeleteId = null;
+    let selectedFile = null;
+    // 学生考试数据（包含随机题目列表）
+    let examData = {
+      currentStudent: null,
+      currentQuestionIndex: 0,
+      answers: [],
+      timer: null,
+      remainingTime: 30 * 60, // 30分钟，单位：秒
+      randomQuestions: [] // 存储当前学生的随机题目列表
+    };
+    // 当前查看试卷的学生
+    let currentViewStudent = null;
+
+    // DOM元素
+    const el = {
+      // 角色选择
+      roleSelection: document.getElementById('role-selection'),
+      goToStudentLogin: document.getElementById('go-to-student-login'),
+      goToTeacherLogin: document.getElementById('go-to-teacher-login'),
+      
+      // 教师端
+      teacherLoginView: document.getElementById('teacher-login-view'),
+      teacherLoginForm: document.getElementById('teacher-login-form'),
+      teacherId: document.getElementById('teacher-id'),
+      teacherPassword: document.getElementById('teacher-password'),
+      backToRoleFromTeacher: document.getElementById('back-to-role-from-teacher'),
+      teacherStudentManagement: document.getElementById('teacher-student-management'),
+      backToStudentList: document.getElementById('back-to-student-list'),
+      teacherViewPaper: document.getElementById('teacher-view-paper'),
+      paperStudentName: document.getElementById('paper-student-name'),
+      paperStudentPhone: document.getElementById('paper-student-phone'),
+      paperStudentScore: document.getElementById('paper-student-score'),
+      paperExamStatus: document.getElementById('paper-exam-status'),
+      paperQuestionsContainer: document.getElementById('paper-questions-container'),
+      
+      // 学生端
+      studentLoginView: document.getElementById('student-login-view'),
+      studentLoginForm: document.getElementById('student-login-form'),
+      studentLoginPhone: document.getElementById('student-login-phone'),
+      studentLoginPassword: document.getElementById('student-login-password'),
+      studentLoginError: document.getElementById('student-login-error'),
+      backToRoleFromStudent: document.getElementById('back-to-role-from-student'),
+      studentExamView: document.getElementById('student-exam-view'),
+      examTimer: document.getElementById('exam-timer'),
+      questionContainer: document.getElementById('question-container'),
+      progressContainer: document.getElementById('progress-container'),
+      prevQuestionBtn: document.getElementById('prev-question-btn'),
+      nextQuestionBtn: document.getElementById('next-question-btn'),
+      submitExamBtn: document.getElementById('submit-exam-btn'),
+      examResultView: document.getElementById('exam-result-view'),
+      resultStudentName: document.getElementById('result-student-name'),
+      resultScore: document.getElementById('result-score'),
+      resultStatus: document.getElementById('result-status'),
+      statTotal: document.getElementById('stat-total'),
+      statCorrect: document.getElementById('stat-correct'),
+      statWrong: document.getElementById('stat-wrong'),
+      statUnanswered: document.getElementById('stat-unanswered'),
+      reviewAnswersBtn: document.getElementById('review-answers-btn'),
+      backToStudentLoginBtn: document.getElementById('back-to-student-login-btn'),
+      
+      // 教师功能元素
+      userInfo: document.getElementById('user-info'),
+      currentUser: document.getElementById('current-user'),
+      logoutBtn: document.getElementById('logout-btn'),
+      addStudentBtn: document.getElementById('add-student-btn'),
+      studentsList: document.getElementById('students-list'),
+      noStudents: document.getElementById('no-students'),
+      studentSearch: document.getElementById('student-search'),
+      addStudentModal: document.getElementById('add-student-modal'),
+      addStudentForm: document.getElementById('add-student-form'),
+      editStudentId: document.getElementById('edit-student-id'),
+      studentName: document.getElementById('student-name'),
+      studentPhone: document.getElementById('student-phone'),
+      studentPassword: document.getElementById('student-password'),
+      phoneError: document.getElementById('phone-error'),
+      cancelAdd: document.getElementById('cancel-add'),
+      deleteModal: document.getElementById('delete-modal'),
+      deleteMessage: document.getElementById('delete-message'),
+      cancelDelete: document.getElementById('cancel-delete'),
+      confirmDelete: document.getElementById('confirm-delete'),
+      uploadQuestionBtn: document.getElementById('upload-question-btn'),
+      uploadModal: document.getElementById('upload-modal'),
+      questionFile: document.getElementById('question-file'),
+      selectFileBtn: document.getElementById('select-file-btn'),
+      selectedFileName: document.getElementById('selected-file-name'),
+      cancelUpload: document.getElementById('cancel-upload'),
+      confirmUpload: document.getElementById('confirm-upload'),
+      
+      // 提交确认弹窗
+      submitConfirmModal: document.getElementById('submit-confirm-modal'),
+      cancelSubmit: document.getElementById('cancel-submit'),
+      confirmSubmit: document.getElementById('confirm-submit')
+    };
+
+    // 初始化
+    function init() {
+      bindEvents();
+      renderStudents(); // 初始化学生列表
+    }
+
+    // 绑定所有事件
+    function bindEvents() {
+      // 1. 角色选择事件
+      el.goToStudentLogin.addEventListener('click', () => {
+        el.roleSelection.classList.add('hidden');
+        el.studentLoginView.classList.remove('hidden');
+      });
+      
+      el.goToTeacherLogin.addEventListener('click', () => {
+        el.roleSelection.classList.add('hidden');
+        el.teacherLoginView.classList.remove('hidden');
+      });
+      
+      el.backToRoleFromTeacher.addEventListener('click', () => {
+        el.teacherLoginView.classList.add('hidden');
+        el.roleSelection.classList.remove('hidden');
+      });
+      
+      el.backToRoleFromStudent.addEventListener('click', () => {
+        el.studentLoginView.classList.add('hidden');
+        el.roleSelection.classList.remove('hidden');
+        el.studentLoginError.classList.add('hidden');
+      });
+
+      // 2. 教师端事件
+      el.teacherLoginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = el.teacherId.value.trim();
+        const password = el.teacherPassword.value.trim();
+        
+        if (password === 'teacher123') {
+          el.currentUser.textContent = `教师 (${id})`;
+          el.userInfo.classList.remove('hidden');
+          el.teacherLoginView.classList.add('hidden');
+          el.teacherStudentManagement.classList.remove('hidden');
+          renderStudents();
+        } else {
+          alert('密码错误，默认密码：teacher123');
+        }
+      });
+      
+      el.logoutBtn.addEventListener('click', () => {
+        // 重置所有视图
+        el.userInfo.classList.add('hidden');
+        el.teacherStudentManagement.classList.add('hidden');
+        el.teacherViewPaper.classList.add('hidden');
+        el.studentExamView.classList.add('hidden');
+        el.examResultView.classList.add('hidden');
+        el.roleSelection.classList.remove('hidden');
+        
+        // 清除考试计时器
+        if (examData.timer) {
+          clearInterval(examData.timer);
+        }
+        
+        // 重置表单
+        el.teacherLoginForm.reset();
+        el.studentLoginForm.reset();
+        el.studentLoginError.classList.add('hidden');
+      });
+      
+      el.addStudentBtn.addEventListener('click', () => {
+        el.addStudentForm.reset();
+        el.editStudentId.value = '';
+        el.phoneError.classList.add('hidden');
+        el.addStudentModal.classList.add('show');
+      });
+      
+      el.cancelAdd.addEventListener('click', () => {
+        el.addStudentModal.classList.remove('show');
+      });
+      
+      el.addStudentForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveStudent();
+      });
+      
+      el.studentPhone.addEventListener('input', () => {
+        const phone = el.studentPhone.value.trim();
+        const editId = el.editStudentId.value;
+        const exists = students.some(s => s.phone === phone && s.id !== editId);
+        el.phoneError.classList.toggle('hidden', !exists);
+      });
+      
+      el.studentSearch.addEventListener('input', (e) => {
+        const keyword = e.target.value.toLowerCase();
+        renderStudents(keyword);
+      });
+      
+      el.cancelDelete.addEventListener('click', () => {
+        el.deleteModal.classList.remove('show');
+      });
+      
+      el.confirmDelete.addEventListener('click', () => {
+        if (currentDeleteId) {
+          students = students.filter(s => s.id !== currentDeleteId);
+          saveStudents();
+          renderStudents();
+          el.deleteModal.classList.remove('show');
+        }
+      });
+      
+      el.uploadQuestionBtn.addEventListener('click', () => {
+        el.uploadModal.classList.add('show');
+        selectedFile = null;
+        el.selectedFileName.textContent = '未选择文件';
+      });
+      
+      el.selectFileBtn.addEventListener('click', () => {
+        el.questionFile.click();
+      });
+      
+      el.questionFile.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          selectedFile = e.target.files[0];
+          el.selectedFileName.textContent = selectedFile.name;
+        }
+      });
+      
+      el.cancelUpload.addEventListener('click', () => {
+        el.uploadModal.classList.remove('show');
+        el.questionFile.value = '';
+      });
+      
+      el.confirmUpload.addEventListener('click', () => {
+        if (!selectedFile) {
+          alert('请选择文件');
+          return;
+        }
+        
+        if (!selectedFile.name.endsWith('.csv')) {
+          alert('请上传CSV格式的文件');
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const content = event.target.result;
+            const lines = content.split('\n').filter(line => line.trim() !== '');
+            const newQuestions = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+              const parts = lines[i].split(',');
+              if (parts.length !== 6) {
+                alert(`第${i+1}行格式错误，请检查！`);
+                return;
+              }
+              
+              const answer = parseInt(parts[5].trim());
+              if (isNaN(answer) || answer < 0 || answer > 3) {
+                alert(`第${i+1}行正确答案格式错误，应是0-3之间的数字！`);
+                return;
+              }
+              
+              newQuestions.push({
+                id: i,
+                question: parts[0].trim(),
+                options: [parts[1].trim(), parts[2].trim(), parts[3].trim(), parts[4].trim()],
+                answer: answer
+              });
+            }
+            
+            if (newQuestions.length === 0) {
+              alert('文件中没有有效题目！');
+              return;
+            }
+            
+            questionBank = newQuestions;
+            localStorage.setItem('questionBank', JSON.stringify(questionBank));
+            alert(`成功上传 ${newQuestions.length} 道题目！`);
+            el.uploadModal.classList.remove('show');
+            el.questionFile.value = '';
+          } catch (error) {
+            alert('文件解析失败，请检查格式！');
+            console.error(error);
+          }
+        };
+        reader.readAsText(selectedFile);
+      });
+
+      // 3. 学生端事件
+      // 学生登录
+      el.studentLoginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const phone = el.studentLoginPhone.value.trim();
+        const password = el.studentLoginPassword.value.trim();
+        
+        // 验证学生账号
+        const student = students.find(s => s.phone === phone && s.password === password);
+        if (!student) {
+          el.studentLoginError.classList.remove('hidden');
+          return;
+        }
+        
+        // 初始化考试数据（生成随机50道题）
+        examData.currentStudent = student;
+        examData.currentQuestionIndex = 0;
+        examData.randomQuestions = getRandomQuestions(50); // 随机抽取50道题
+        examData.answers = new Array(examData.randomQuestions.length).fill(null); // 答案数组匹配题数
+        examData.remainingTime = 30 * 60;
+        
+        // 显示考试界面
+        el.studentLoginView.classList.add('hidden');
+        el.studentExamView.classList.remove('hidden');
+        el.currentUser.textContent = `学生 (${student.name})`;
+        el.userInfo.classList.remove('hidden');
+        
+        // 渲染题目和进度
+        renderCurrentQuestion();
+        renderProgress();
+        startExamTimer();
+      });
+      
+      // 上一题
+      el.prevQuestionBtn.addEventListener('click', () => {
+        if (examData.currentQuestionIndex > 0) {
+          examData.currentQuestionIndex--;
+          renderCurrentQuestion();
+          renderProgress();
+          updateNavButtons();
+        }
+      });
+      
+      // 下一题
+      el.nextQuestionBtn.addEventListener('click', () => {
+        if (examData.currentQuestionIndex < examData.randomQuestions.length - 1) {
+          examData.currentQuestionIndex++;
+          renderCurrentQuestion();
+          renderProgress();
+          updateNavButtons();
+        }
+      });
+      
+      // 提交试卷
+      el.submitExamBtn.addEventListener('click', () => {
+        el.submitConfirmModal.classList.add('show');
+      });
+      
+      // 取消提交
+      el.cancelSubmit.addEventListener('click', () => {
+        el.submitConfirmModal.classList.remove('show');
+      });
+      
+      // 确认提交
+      el.confirmSubmit.addEventListener('click', () => {
+        el.submitConfirmModal.classList.remove('show');
+        submitExam();
+      });
+      
+      // 查看答题详情
+      el.reviewAnswersBtn.addEventListener('click', () => {
+        showAnswerReview();
+      });
+      
+      // 退出登录（学生端）
+      el.backToStudentLoginBtn.addEventListener('click', () => {
+        el.examResultView.classList.add('hidden');
+        el.roleSelection.classList.remove('hidden');
+        el.userInfo.classList.add('hidden');
+      });
+
+      // 4. 教师查看试卷事件
+      el.backToStudentList.addEventListener('click', () => {
+        el.teacherViewPaper.classList.add('hidden');
+        el.teacherStudentManagement.classList.remove('hidden');
+      });
+    }
+
+    // 渲染学生列表
+    function renderStudents(keyword = '') {
+      el.studentsList.innerHTML = '';
+      
+      const filtered = keyword 
+        ? students.filter(s => 
+            s.name.toLowerCase().includes(keyword) || 
+            s.phone.includes(keyword)
+          )
+        : students;
+      
+      if (filtered.length === 0) {
+        el.noStudents.classList.remove('hidden');
+        return;
+      }
+      
+      el.noStudents.classList.add('hidden');
+      
+      filtered.forEach(student => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${student.name}</td>
+          <td>${student.phone}</td>
+          <td>${student.score || 0}</td>
+          <td>
+            <span style="display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 14px; ${
+              student.status === '已完成' ? 'background: #E6FFFA; color: #36D399' : 'background: #F3F4F6; color: #6B7280'
+            }">
+              ${student.status || '未考试'}
+            </span>
+          </td>
+          <td>
+            <button class="edit-btn btn btn-default" data-id="${student.id}" style="padding: 4px 8px; margin-right: 5px;">
+              <i class="fa fa-edit"></i> 编辑
+            </button>
+            <button class="delete-btn btn btn-danger" data-id="${student.id}" data-name="${student.name}" style="padding: 4px 8px; margin-right: 5px;">
+              <i class="fa fa-trash"></i> 删除
+            </button>
+            <button class="view-paper-btn btn btn-primary" data-id="${student.id}" style="padding: 4px 8px; ${
+              student.status !== '已完成' ? 'opacity: 0.5; cursor: not-allowed;' : ''
+            }" ${student.status !== '已完成' ? 'disabled' : ''}>
+              <i class="fa fa-file-text-o"></i> 查看试卷
+            </button>
+          </td>
+        `;
+        el.studentsList.appendChild(tr);
+      });
+      
+      // 编辑按钮事件
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          const student = students.find(s => s.id === id);
+          if (student) {
+            el.studentName.value = student.name;
+            el.studentPhone.value = student.phone;
+            el.studentPassword.value = student.password;
+            el.editStudentId.value = id;
+            el.phoneError.classList.add('hidden');
+            el.addStudentModal.classList.add('show');
+          }
+        });
+      });
+      
+      // 删除按钮事件
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentDeleteId = btn.getAttribute('data-id');
+          el.deleteMessage.textContent = `确定要删除学生"${btn.getAttribute('data-name')}"吗？`;
+          el.deleteModal.classList.add('show');
+        });
+      });
+      
+      // 查看试卷按钮事件
+      document.querySelectorAll('.view-paper-btn:not([disabled])').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const studentId = btn.getAttribute('data-id');
+          currentViewStudent = students.find(s => s.id === studentId);
+          if (currentViewStudent) {
+            showStudentPaper();
+          }
+        });
+      });
+    }
+
+    // 保存学生
+    function saveStudent() {
+      const name = el.studentName.value.trim();
+      const phone = el.studentPhone.value.trim();
+      const password = el.studentPassword.value.trim();
+      const editId = el.editStudentId.value;
+      
+      if (!name) {
+        alert('请输入姓名');
+        return;
+      }
+      
+      if (!/^1[3-9]\d{9}$/.test(phone)) {
+        alert('请输入有效的手机号');
+        return;
+      }
+      
+      if (!password) {
+        alert('请设置密码');
+        return;
+      }
+      
+      const phoneExists = students.some(s => s.phone === phone && s.id !== editId);
+      if (phoneExists) {
+        el.phoneError.classList.remove('hidden');
+        return;
+      }
+      
+      if (editId) {
+        const index = students.findIndex(s => s.id === editId);
+        students[index] = { ...students[index], name, phone, password };
+      } else {
+        students.push({
+          id: Date.now().toString(),
+          name,
+          phone,
+          password,
+          score: 0,
+          status: '未考试',
+          answers: [],
+          randomQuestionIds: [] // 存储随机题目的ID列表
+        });
+      }
+      
+      saveStudents();
+      renderStudents();
+      el.addStudentModal.classList.remove('show');
+    }
+
+    // 保存学生到本地存储
+    function saveStudents() {
+      localStorage.setItem('students', JSON.stringify(students));
+    }
+
+    // 随机抽取指定数量的题目（去重）
+    function getRandomQuestions(count) {
+      // 深拷贝题库避免修改原数组
+      const shuffled = [...questionBank];
+      // Fisher-Yates 洗牌算法打乱顺序
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      // 取前count道（如果题库不足count道则返回全部）
+      return shuffled.slice(0, Math.min(count, shuffled.length));
+    }
+
+    // 渲染当前题目（基于随机题目列表）
+    function renderCurrentQuestion() {
+      const question = examData.randomQuestions[examData.currentQuestionIndex];
+      if (!question) return;
+      
+      el.questionContainer.innerHTML = `
+        <h3 style="margin-top: 0; margin-bottom: 20px;">${examData.currentQuestionIndex + 1}. ${question.question}</h3>
+        <div style="margin-bottom: 10px;">
+          ${question.options.map((option, index) => `
+            <div class="option-item ${examData.answers[examData.currentQuestionIndex] === index ? 'selected' : ''}" data-index="${index}">
+              <span style="font-weight: 500; margin-right: 10px;">${String.fromCharCode(65 + index)}.</span>
+              ${option}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      
+      // 绑定选项点击事件
+      document.querySelectorAll('.option-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const selectedIndex = parseInt(item.getAttribute('data-index'));
+          examData.answers[examData.currentQuestionIndex] = selectedIndex;
+          renderCurrentQuestion();
+          renderProgress();
+        });
+      });
+    }
+
+    // 渲染答题进度（基于随机题目数量）
+    function renderProgress() {
+      el.progressContainer.innerHTML = '';
+      
+      examData.randomQuestions.forEach((_, index) => {
+        const progressItem = document.createElement('div');
+        progressItem.className = `progress-item ${
+          examData.answers[index] !== null ? 'answered' : ''
+        } ${index === examData.currentQuestionIndex ? 'current' : ''}`;
+        progressItem.textContent = index + 1;
+        progressItem.addEventListener('click', () => {
+          examData.currentQuestionIndex = index;
+          renderCurrentQuestion();
+          renderProgress();
+          updateNavButtons();
+        });
+        el.progressContainer.appendChild(progressItem);
+      });
+    }
+
+    // 更新导航按钮状态（基于随机题目数量）
+    function updateNavButtons() {
+      el.prevQuestionBtn.disabled = examData.currentQuestionIndex === 0;
+      el.nextQuestionBtn.disabled = examData.currentQuestionIndex === examData.randomQuestions.length - 1;
+    }
+
+    // 启动考试计时器
+    function startExamTimer() {
+      if (examData.timer) {
+        clearInterval(examData.timer);
+      }
+      
+      updateTimerDisplay();
+      
+      examData.timer = setInterval(() => {
+        examData.remainingTime--;
+        updateTimerDisplay();
+        
+        if (examData.remainingTime <= 0) {
+          clearInterval(examData.timer);
+          submitExam();
+        } else if (examData.remainingTime <= 300) { // 最后5分钟
+          el.examTimer.classList.add('warning');
+        }
+      }, 1000);
+    }
+
+    // 更新计时器显示
+    function updateTimerDisplay() {
+      const minutes = Math.floor(examData.remainingTime / 60);
+      const seconds = examData.remainingTime % 60;
+      el.examTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // 提交试卷（基于随机题目计算成绩）
+    function submitExam() {
+      // 清除计时器
+      if (examData.timer) {
+        clearInterval(examData.timer);
+      }
+      
+      // 计算成绩（基于随机抽取的题目）
+      let correct = 0;
+      let wrong = 0;
+      let unanswered = 0;
+      
+      examData.answers.forEach((answer, index) => {
+        const question = examData.randomQuestions[index];
+        if (answer === null) {
+          unanswered++;
+        } else if (answer === question.answer) {
+          correct++;
+        } else {
+          wrong++;
+        }
+      });
+      
+      const score = Math.round((correct / examData.randomQuestions.length) * 100);
+      
+      // 更新学生数据（保存随机题目ID列表和答题记录）
+      const studentIndex = students.findIndex(s => s.id === examData.currentStudent.id);
+      if (studentIndex !== -1) {
+        students[studentIndex] = {
+          ...students[studentIndex],
+          score: score,
+          status: '已完成',
+          answers: examData.answers,
+          // 保存随机题目的ID列表（用于教师查看时还原题目）
+          randomQuestionIds: examData.randomQuestions.map(q => q.id)
+        };
+        saveStudents();
+      }
+      
+      // 显示成绩页面
+      el.studentExamView.classList.add('hidden');
+      el.examResultView.classList.remove('hidden');
+      
+      // 填充成绩数据（基于实际题数）
+      el.resultStudentName.textContent = `考生：${examData.currentStudent.name}（${examData.currentStudent.phone}）`;
+      el.resultScore.textContent = score;
+      el.resultStatus.textContent = score >= 60 ? '考试通过' : '考试未通过';
+      el.resultStatus.style.color = score >= 60 ? '#36D399' : '#F87272';
+      el.statTotal.textContent = examData.randomQuestions.length; // 显示实际题数
+      el.statCorrect.textContent = correct;
+      el.statWrong.textContent = wrong;
+      el.statUnanswered.textContent = unanswered;
+    }
+
+    // 查看答题详情（基于随机题目）
+    function showAnswerReview() {
+      el.examResultView.classList.add('hidden');
+      el.studentExamView.classList.remove('hidden');
+      
+      el.questionContainer.innerHTML = '';
+      
+      examData.randomQuestions.forEach((question, index) => {
+        const isCorrect = examData.answers[index] === question.answer;
+        const isAnswered = examData.answers[index] !== null;
+        
+        const questionElement = document.createElement('div');
+        questionElement.style.marginBottom = '30px';
+        questionElement.innerHTML = `
+          <h3 style="margin-top: 0;">${index + 1}. ${question.question}</h3>
+          <div style="margin: 10px 0;">
+            ${question.options.map((option, optIndex) => `
+              <div style="padding: 10px; border: 1px solid ${
+                optIndex === question.answer ? '#36D399' : 
+                isAnswered && optIndex === examData.answers[index] ? '#F87272' : '#E5E7EB'
+              }; border-radius: 6px; margin-bottom: 8px; background: ${
+                optIndex === question.answer ? '#F0FFF4' : 
+                isAnswered && optIndex === examData.answers[index] ? '#FFF2F2' : 'transparent'
+              }">
+                <span style="font-weight: 500; margin-right: 10px;">${String.fromCharCode(65 + optIndex)}.</span>
+                ${option}
+                ${optIndex === question.answer ? '<span style="color: #36D399; margin-left: 10px;">（正确答案）</span>' : ''}
+                ${isAnswered && optIndex === examData.answers[index] && optIndex !== question.answer ? '<span style="color: #F87272; margin-left: 10px;">（你的答案）</span>' : ''}
+              </div>
+            `).join('')}
+          </div>
+          <div style="color: ${isCorrect ? '#36D399' : isAnswered ? '#F87272' : '#6B7280'}">
+            ${isCorrect ? '✓ 回答正确' : isAnswered ? '✗ 回答错误' : '○ 未作答'}
+          </div>
+          <hr style="margin-top: 15px; border: none; border-top: 1px solid #E5E7EB;">
+        `;
+        
+        el.questionContainer.appendChild(questionElement);
+      });
+      
+      // 隐藏导航按钮和提交按钮
+      el.prevQuestionBtn.classList.add('hidden');
+      el.nextQuestionBtn.classList.add('hidden');
+      el.submitExamBtn.classList.add('hidden');
+    }
+
+    // 教师查看学生试卷（基于学生的随机题目ID列表还原题目）
+    function showStudentPaper() {
+      el.teacherStudentManagement.classList.add('hidden');
+      el.teacherViewPaper.classList.remove('hidden');
+      
+      // 填充学生基本信息
+      el.paperStudentName.textContent = `学生姓名：${currentViewStudent.name}`;
+      el.paperStudentPhone.textContent = `手机号：${currentViewStudent.phone}`;
+      el.paperStudentScore.textContent = `得分：${currentViewStudent.score || 0}/100`;
+      
+      // 考试状态
+      const statusText = currentViewStudent.status === '已完成' 
+        ? (currentViewStudent.score >= 60 ? '考试通过' : '考试未通过') 
+        : '未考试';
+      const statusColor = currentViewStudent.status === '已完成' 
+        ? (currentViewStudent.score >= 60 ? '#36D399' : '#F87272') 
+        : '#6B7280';
+      
+      el.paperExamStatus.textContent = `考试状态：${statusText}`;
+      el.paperExamStatus.style.color = statusColor;
+      
+      // 根据学生保存的随机题目ID列表，从题库中还原题目
+      const studentQuestions = currentViewStudent.randomQuestionIds 
+        ? currentViewStudent.randomQuestionIds.map(id => 
+            questionBank.find(q => q.id === id)
+          ).filter(Boolean) // 过滤可能不存在的题目
+        : [];
+      
+      // 渲染试卷题目
+      el.paperQuestionsContainer.innerHTML = '';
+      
+      studentQuestions.forEach((question, index) => {
+        if (!question) return; // 跳过不存在的题目
+        
+        const studentAnswer = currentViewStudent.answers ? currentViewStudent.answers[index] : null;
+        const isCorrect = studentAnswer === question.answer;
+        const isAnswered = studentAnswer !== null;
+        
+        const questionElement = document.createElement('div');
+        questionElement.className = 'question-item';
+        
+        questionElement.innerHTML = `
+          <div class="question-number">第${index + 1}题：${question.question}</div>
+          <div style="margin: 15px 0;">
+            ${question.options.map((option, optIndex) => {
+              let optionClass = 'option-display';
+              let optionLabel = '';
+              
+              if (optIndex === question.answer) {
+                optionClass += ' option-correct';
+                optionLabel = '<span style="color: #36D399; margin-left: 8px;">（正确答案）</span>';
+              } else if (isAnswered && optIndex === studentAnswer) {
+                optionClass += ' option-student';
+                optionLabel = '<span style="color: #F87272; margin-left: 8px;">（学生答案）</span>';
+              }
+              
+              return `
+                <div class="${optionClass}">
+                  <span style="font-weight: 500; margin-right: 10px;">${String.fromCharCode(65 + optIndex)}.</span>
+                  ${option}${optionLabel}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+        
+        // 答题状态
+        const statusElement = document.createElement('div');
+        statusElement.className = 'answer-status';
+        
+        if (isCorrect) {
+          statusElement.className += ' status-correct';
+          statusElement.innerHTML = '<i class="fa fa-check-circle"></i> 回答正确';
+        } else if (isAnswered) {
+          statusElement.className += ' status-wrong';
+          statusElement.innerHTML = '<i class="fa fa-times-circle"></i> 回答错误';
+        } else {
+          statusElement.className += ' status-unanswered';
+          statusElement.innerHTML = '<i class="fa fa-exclamation-circle"></i> 未作答';
+        }
+        
+        questionElement.appendChild(statusElement);
+        el.paperQuestionsContainer.appendChild(questionElement);
+      });
+    }
+
+    // 初始化应用
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
